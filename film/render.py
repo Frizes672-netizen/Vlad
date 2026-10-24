@@ -12,7 +12,7 @@ from multiprocessing import Pool
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from timeline import (CHAPTERS, DURATION, EV, FINAL_START, FPS, H, SPEAKERS,
+from timeline import (BURN_SUBTITLES, CHAPTERS, DURATION, EV, FINAL_START, FPS, H, SPEAKERS,
                       SUBS, W)
 
 FD = "/usr/share/fonts/truetype/"
@@ -1115,7 +1115,8 @@ def frame(i):
     if img.size != (W, H):
         img = img.resize((W, H))
     img = post(img.convert("RGB"), t, fn)
-    img = overlay_text(img, t)
+    if BURN_SUBTITLES:
+        img = overlay_text(img, t)
     return img.tobytes()
 
 
