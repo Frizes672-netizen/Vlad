@@ -8,7 +8,7 @@ import wave
 
 import numpy as np
 
-from timeline import DURATION
+from timeline import DURATION, EV
 
 SR = 44100
 rng = np.random.default_rng(1337)
@@ -280,104 +280,106 @@ def riser(d, f=110):
 
 # ---------------------------------------------------------------- партитура
 def score():
-    # 0–8: ПРОБУЖДЕНИЕ
+    E = EV
+    # ПРОБУЖДЕНИЕ: вдох, волны, огонь, рык из джунглей
     place(gasp(), 0.25, 0.55)
-    t = tvec(8.2)
-    waves = band(noise(8.2), 40, 700) * (0.35 + 0.65 * np.sin(np.pi * t / 3.3) ** 2)
-    hiss = band(noise(8.2), 2000, 8000) * (0.2 + 0.8 * np.sin(np.pi * (t - 0.6) / 3.3) ** 4)
-    sea = norm(waves) * 0.6 + norm(hiss) * 0.2
-    sea *= fade(np.ones(len(sea)), 1.2, 1.8)
-    place(sea * np.r_[np.full(secs(6.0), 1.0), np.linspace(1, 0.4, len(sea) - secs(6.0))], 0, 0.75, -0.2)
-    fire = band(noise(4.7), 40, 300) * 0.4
-    for _ in range(140):
+    sea_d = 9.0
+    t = tvec(sea_d)
+    waves = band(noise(sea_d), 40, 700) * (0.35 + 0.65 * np.sin(np.pi * t / 3.3) ** 2)
+    hiss = band(noise(sea_d), 2000, 8000) * (0.2 + 0.8 * np.sin(np.pi * (t - 0.6) / 3.3) ** 4)
+    sea = (norm(waves) * 0.6 + norm(hiss) * 0.2) * fade(np.ones(secs(sea_d)), 1.2, 2.0)
+    place(sea, 0, 0.75, -0.2)
+    fire = band(noise(6.0), 40, 300) * 0.4
+    for _ in range(170):
         i = rng.integers(0, len(fire) - 2000)
         c = band(noise(0.03), 1500, 8000) * decay(0.03, 0.004)
         fire[i:i + len(c)] += c * rng.uniform(0.2, 1.0)
-    place(norm(fire) * fade(np.ones(len(fire)), 0.6, 0.6), 1.5, 0.35, 0.35)
-    place(drone(84.0, 41), 0, 0.22)
-    place(roar(), 6.05, 0.95)
-    place(stinger(2.0, low=True) * 0.6, 6.05, 0.5)
+    place(norm(fire) * fade(np.ones(len(fire)), 0.6, 0.8), 1.5, 0.35, 0.35)
+    place(drone(DURATION, 41), 0, 0.22)
+    place(roar(), E["roar"], 0.95)
+    place(stinger(2.0, low=True) * 0.6, E["roar"], 0.5)
 
-    # 8–22: ОНИ РЯДОМ
-    tt = 8.0
-    k = 0
-    while tt < 15.1:
+    # ОНИ РЯДОМ: бег, дыхание, ветки, хруст, преследователи
+    tt, k = E["run"], 0
+    while tt < E["slam"] - 0.2:
         place(footstep(), tt, 0.55, -0.15 if k % 2 else 0.15)
         tt += 0.27
         k += 1
-    for tt in np.arange(8.1, 15.0, 0.55):
+    for tt in np.arange(E["run"] + 0.1, E["slam"] - 0.3, 0.55):
         place(breath_cycle(0.4), tt, 0.25)
-    for tt in (8.6, 9.4, 10.3, 11.1, 11.9, 12.6):
+    for tt in np.arange(E["run"] + 0.5, E["pursuers"], 0.75):
         place(whoosh(0.4), tt, 0.55, rng.uniform(-0.8, 0.8))
-    place(bone_crunch(), 9.6, 0.6, 0.6)
-    place(bone_crunch(), 11.6, 0.6, -0.5)
-    place(bone_crunch(), 12.8, 0.7, 0.2)
-    place(stinger(2.5), 13.2, 0.85)
-    place(growl(1.8), 13.3, 0.6, -0.3)
-    place(growl(1.6), 13.5, 0.5, 0.4)
-    place(door_slam(), 15.4, 1.0)
-    place(table_drag(1.0), 15.65, 0.6)
-    place(thump(70, 0.4, 1.5, 0.08), 16.6, 0.6)
-    for tt in (17.2, 17.8, 18.5, 19.1, 19.6):
+    for tt in (E["run"] + 1.2, E["run"] + 2.6, E["pursuers"] + 1.4):
+        place(bone_crunch(), tt, 0.6, rng.uniform(-0.6, 0.6))
+    place(stinger(2.5), E["pursuers"], 0.85)
+    place(growl(1.8), E["pursuers"] + 0.1, 0.6, -0.3)
+    place(growl(1.6), E["pursuers"] + 0.9, 0.5, 0.4)
+    place(door_slam(), E["slam"], 1.0)
+    place(table_drag(1.0), E["table"], 0.6)
+    place(thump(70, 0.4, 1.5, 0.08), E["table"] + 1.0, 0.6)
+    for tt in E["scratches"]:
         place(scratch_stroke(rng.uniform(0.35, 0.55)), tt, 0.5, rng.uniform(-0.3, 0.3))
-    place(heartbeat(0.4), 20.2, 1.0)
-    place(heartbeat(0.45), 20.85, 1.0)
-    place(thump(45, 1.5, 2.0, 0.3), 21.2, 1.0)
+    place(heartbeat(0.4), E["silence"] + 0.2, 1.0)
+    place(heartbeat(0.45), E["silence"] + 0.85, 1.0)
+    place(thump(45, 1.5, 2.0, 0.3), E["thud"], 1.0)
     for _ in range(25):
-        place(band(noise(0.02), 2000, 8000) * decay(0.02, 0.004), 21.25 + rng.uniform(0, 0.7), 0.25, rng.uniform(-1, 1))
+        place(band(noise(0.02), 2000, 8000) * decay(0.02, 0.004), E["thud"] + rng.uniform(0.05, 0.7), 0.25, rng.uniform(-1, 1))
 
-    # 22–38: ВТОРОЙ ВЫЖИВШИЙ
-    place(knife_ring(), 22.1, 0.45, 0.4)
-    place(whoosh(0.5, 300, 2500), 22.75, 0.8, -0.4)
-    place(stinger(2.0, low=True), 23.0, 0.8)
-    place(thump(60, 0.5, 2, 0.1), 23.3, 0.6)
-    for tt in np.arange(31.2, 34.0, 0.33):
+    # ВТОРОЙ ВЫЖИВШИЙ: нож, бросок, стена «ОНИ УЧАТСЯ»
+    place(knife_ring(), E["lunge_shot"] + 0.1, 0.45, 0.4)
+    place(whoosh(0.5, 300, 2500), E["lunge"] - 0.25, 0.8, -0.4)
+    place(stinger(2.0, low=True), E["lunge"], 0.8)
+    place(thump(60, 0.5, 2, 0.1), E["lunge"] + 0.3, 0.6)
+    for tt in np.arange(E["wall"] + 0.2, E["wall_text"] - 0.6, 0.4):
         place(scratch_stroke(0.18), tt, 0.25, rng.uniform(-0.4, 0.4))
-    place(riser(3.3, 98), 31.2, 0.35)
-    place(stinger(3.5), 34.4, 0.9)
-    for tt in (35.4, 36.3, 37.1):
-        place(drip(), tt, 0.5)
+    place(riser(E["wall_text"] - E["wall"] - 0.2, 98), E["wall"] + 0.2, 0.35)
+    place(stinger(3.5), E["wall_text"], 0.9)
+    for tt in (0.6, 1.1, 1.6):
+        place(drip(), E["wall_text"] + tt, 0.5)
 
-    # 38–55: ЧТО-ТО НЕ ТАК
-    for tt in np.arange(38.4, 44.6, 0.9):
-        place(footstep(soft=True), tt, 0.7, 0.0)
-    for tt, g in ((45.0, 1.0), (45.6, 1.0), (46.2, 1.05)):
-        place(wood_knock(), tt, g)
+    # ЧТО-ТО НЕ ТАК: ровные шаги, три стука, сердцебиение
+    for tt in E["steps"]:
+        place(footstep(soft=True), tt, 0.75, 0.0)
+    for tt in E["knocks"]:
+        place(wood_knock(), tt, 1.0)
         place(thump(80, 0.3, 1.3, 0.05), tt, 0.5)
-    for tt in np.arange(49.8, 55.0, 0.95):
+    for tt in np.arange(E["pale"], E["crack"], 0.95):
         place(heartbeat(0.55), tt, 1.0)
 
-    # 55–69: ПРАВДА
-    place(creak(1.3, 30, 60), 55.0, 0.45)
-    for tt in np.arange(55.2, 66.2, 0.82):
+    # ПРАВДА: щель, спасатель, поворот головы
+    place(creak(1.3, 30, 60), E["crack"], 0.45)
+    for tt in np.arange(E["crack"] + 0.2, E["head_turn"], 0.82):
         place(heartbeat(0.45), tt, 1.0)
-    place(creak(1.0, 40, 80, 1.3), 61.9, 0.3, 0.3)
-    place(creak(0.9, 20, 45, 0.7), 66.25, 0.55)
-    place(stinger(2.5), 66.6, 0.8)
-    for i, tt in enumerate(np.arange(66.4, 69.0, 0.55)):
+    place(creak(1.0, 40, 80, 1.3), E["grab"] - 0.1, 0.3, 0.3)
+    place(creak(0.9, 20, 45, 0.7), E["head_turn"], 0.55)
+    place(stinger(2.5), E["head_turn"] + 0.3, 0.8)
+    for tt in np.arange(E["head_turn"] + 0.2, E["radio"], 0.55):
         place(heartbeat(1.0), tt, 1.1)
 
-    # 69–80: КЛИФФХЭНГЕР
-    place(squelch(), 69.15, 0.8, 0.3)
-    place(radio_static(5.3), 69.4, 0.5, 0.3)
-    place(squelch(), 74.5, 0.8, 0.3)
-    place(stinger(2.0, low=False) * 0.6, 74.6, 0.5)
-    for tt in (76.5, 77.0, 77.4):
-        place(drip(), tt, 0.5, -0.2)
-    place(creak(1.1, 15, 35, 0.5), 77.5, 0.9)
-    place(riser(1.1, 82), 77.5, 0.6)
-    for tt in (77.7, 78.1, 78.35):
-        place(thump(50, 0.4, 2, 0.08), tt, 0.9)
-        place(bone_crunch(), tt + 0.02, 0.5)
+    # КЛИФФХЭНГЕР: рация, кровь, дверь прогибается
+    for q in E["squelch"]:
+        place(squelch(), q, 0.8, 0.3)
+    a, b = E["radio_talk"]
+    place(radio_static(b - a + 0.3), a - 0.1, 0.5, 0.3)
+    place(stinger(2.0, low=False) * 0.6, E["turn_her"] + 2.1, 0.5)
+    for tt in (1.4, 2.4, 3.4):
+        place(drip(), E["blood"] + tt, 0.5, -0.2)
+    bend = E["black"] - E["bend"]
+    place(creak(bend, 15, 35, 0.5), E["bend"], 0.9)
+    place(riser(bend, 82), E["bend"], 0.6)
+    for d in (0.1, 0.9, 1.7, 2.4, 2.9):
+        place(thump(50, 0.4, 2, 0.08), E["bend"] + d, 0.9)
+        place(bone_crunch(), E["bend"] + d + 0.02, 0.5)
 
-    # жёсткий обрыв звука на чёрном экране 78.6
-    cut = secs(78.6)
-    mix[cut:secs(79.2)] *= np.linspace(1, 0, secs(79.2) - cut)[:, None] ** 8
+    # жёсткий обрыв звука на чёрном экране
+    cut, end = secs(E["black"]), secs(E["final"])
+    mix[cut:end] *= np.linspace(1, 0, end - cut)[:, None] ** 8
 
     # финальная надпись
-    place(thump(32, 4.0, 3.0, 1.2) * 1.3, 79.2, 1.0)
-    place(stinger(4.0, low=False) * 0.5, 79.2, 0.6)
-    place(drone(4.8, 36) * fade(np.ones(secs(4.8)), 0.3, 2.0), 79.2, 0.8)
+    tail = DURATION - E["final"]
+    place(thump(32, 4.0, 3.0, 1.2) * 1.3, E["final"], 1.0)
+    place(stinger(4.0, low=False) * 0.5, E["final"], 0.6)
+    place(drone(tail, 36) * fade(np.ones(secs(tail)), 0.3, 2.0), E["final"], 0.8)
 
 
 def main(path):

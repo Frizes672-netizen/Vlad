@@ -12,8 +12,8 @@ from multiprocessing import Pool
 import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-from timeline import (CHAPTERS, DURATION, FINAL_START, FINAL_TEXT, FPS, H,
-                      SPEAKERS, SUBS, W)
+from timeline import (CHAPTERS, DURATION, EV, FINAL_START, FPS, H, SPEAKERS,
+                      SUBS, W)
 
 FD = "/usr/share/fonts/truetype/"
 F_SANS_B = FD + "dejavu/DejaVuSans-Bold.ttf"
@@ -89,10 +89,11 @@ def add_glow(img, cx, cy, r, col, strength=1.0):
 
 # ================================================================ камера / тряска
 SHAKES = [  # (время, амплитуда px, затухание с)
-    (6.1, 26, 1.4), (13.2, 14, 0.6), (15.42, 42, 0.45), (15.7, 8, 0.9),
-    (16.6, 10, 0.3), (21.2, 48, 0.55), (23.0, 34, 0.45), (34.4, 16, 0.8),
-    (45.0, 24, 0.25), (45.6, 26, 0.25), (46.2, 30, 0.3), (66.6, 14, 0.5),
-    (77.7, 30, 0.3), (78.1, 40, 0.3), (78.35, 55, 0.3), (79.2, 18, 0.7),
+    (EV["roar"], 26, 1.2), (EV["pursuers"], 14, 0.6), (EV["slam"], 42, 0.45), (EV["table"], 8, 0.9),
+    (EV["table"] + 1.0, 10, 0.3), (EV["thud"], 48, 0.55), (EV["lunge"], 34, 0.45), (EV["wall_text"], 16, 0.8),
+    *[(k, 24 + i * 3, 0.25) for i, k in enumerate(EV["knocks"])], (EV["head_turn"] + 0.3, 14, 0.5),
+    *[(EV["bend"] + d, a, 0.35) for d, a in ((0.1, 22), (0.9, 30), (1.7, 40), (2.4, 50), (2.9, 60))],
+    (EV["final"], 18, 0.7),
 ]
 
 
@@ -366,8 +367,9 @@ def table(d, x, y, s=1.0):
 
 
 SCRATCHES = [  # (время появления, x, y, длина, угол)
-    (17.2, 420, 980, 300, 1.25), (17.8, 600, 900, 340, 1.9), (18.5, 470, 1180, 260, 1.4),
-    (19.1, 640, 1120, 300, 2.0), (19.6, 520, 820, 380, 1.6),
+    (ts, x, y, ln, ang) for ts, (x, y, ln, ang) in zip(EV["scratches"], (
+        (420, 980, 300, 1.25), (600, 900, 340, 1.9), (470, 1180, 260, 1.4),
+        (640, 1120, 300, 2.0), (520, 820, 380, 1.6)))
 ]
 
 
@@ -595,8 +597,8 @@ def bg_radio():
 def radio_frame(t, lt):
     img = bg_radio().copy()
     d = ImageDraw.Draw(img)
-    talking = 70.0 <= t < 74.45
-    on = talking or 69.15 <= t < 69.4 or 74.45 <= t < 74.7
+    talking = EV["radio_talk"][0] <= t < EV["radio_talk"][1]
+    on = talking or any(0 <= t - q < 0.3 for q in EV["squelch"])
     led = (40, 255, 80) if on and int(t * 8) % 2 == 0 else ((200, 20, 20) if on else (60, 10, 10))
     d.ellipse([610, 285, 630, 305], fill=led)
     img = add_glow(img, 620, 295, 80, led, 0.6 if on else 0.1)
@@ -612,7 +614,7 @@ def radio_frame(t, lt):
             d.text((402, 750), "▒▒ ERR ▒▒", font=font(F_MONO_B, 36), fill=scr)
     else:
         d.text((402, 760), "-- --- --", font=font(F_MONO_B, 36), fill=scr)
-    return cam(img, lerp(1.05, 1.35, ease(lt / 5.5)), 0.5, 0.45)
+    return cam(img, lerp(1.05, 1.35, ease(lt / 7.5)), 0.5, 0.45)
 
 
 # ================================================================ кадры (шоты)
@@ -684,7 +686,7 @@ def beach_frame(t, lt):
 
 def shot_beach(t, lt):
     img = beach_frame(t, lt)
-    return cam(img, lerp(1.0, 1.12, ease(lt / 4.4)), 0.6, 0.42)
+    return cam(img, lerp(1.0, 1.14, ease(lt / 5.8)), 0.6, 0.42)
 
 
 @lru_cache(None)
@@ -696,13 +698,13 @@ def jungle_edge_bg():
 def shot_edge(t, lt):
     img = jungle_edge_bg().copy()
     d = ImageDraw.Draw(img)
-    for k, (ts, x, y) in enumerate(((6.3, 380, 1050), (6.65, 720, 980), (7.0, 520, 1260), (7.25, 860, 1180))):
-        if t > ts and not (7.6 < t < 7.75 and k == 1):
+    for k, (ts, x, y) in enumerate(((0.1, 380, 1050), (0.35, 720, 980), (0.6, 520, 1260), (0.85, 860, 1180))):
+        if lt > ts and not (1.1 < lt < 1.18 and k == 1):
             for ex in (-22, 22):
                 d.ellipse([x + ex - 9, y - 5, x + ex + 9, y + 5], fill=(255, 40, 30))
-            img = add_glow(img, x, y, 110, (220, 20, 10), 0.6 * min(1, (t - ts) * 4))
+            img = add_glow(img, x, y, 110, (220, 20, 10), 0.6 * min(1, (lt - ts) * 4))
             d = ImageDraw.Draw(img)
-    return cam(img, lerp(1.05, 1.35, ease(lt / 2.0)), 0.55, 0.6)
+    return cam(img, lerp(1.05, 1.35, ease(lt / 1.3)), 0.55, 0.6)
 
 
 def shot_run(t, lt):
@@ -714,7 +716,7 @@ def shot_run(t, lt):
 def shot_pursuers(t, lt):
     img = jungle_frame(13.2 + lt * 0.1, tint=(1.15, 0.55, 0.5))
     d = ImageDraw.Draw(img)
-    k = ease(lt / 2.0)
+    k = ease(lt / 2.9)
     for i, (x0, ph) in enumerate(((290, 0.0), (560, 1.3), (820, 2.1))):
         s = lerp(520, 1500, k) * (0.92 + 0.08 * i)
         x = 540 + (x0 - 540) * lerp(0.7, 1.6, k)
@@ -725,8 +727,8 @@ def shot_pursuers(t, lt):
 
 
 def shot_slam(t, lt):
-    ang = 1.25 * (1 - ease((t - 15.2) / 0.22))
-    tk = ease((t - 15.65) / 0.95)
+    ang = 1.25 * (1 - ease((t - EV["slam"] + 0.22) / 0.22))
+    tk = ease((t - EV["table"]) / 0.95)
     img = hut_world(t, door_angle=ang, table_k=tk, scratches=False)
     if ang > 0.05:
         d = ImageDraw.Draw(img)
@@ -735,9 +737,9 @@ def shot_slam(t, lt):
 
 
 def shot_scratch(t, lt):
-    shadows = [600 + 60 * math.sin(t * 3), 450 + 40 * math.sin(t * 2.3 + 1)] if t < 19.9 else None
+    shadows = [600 + 60 * math.sin(t * 3), 450 + 40 * math.sin(t * 2.3 + 1)] if t < EV["silence"] - 0.4 else None
     img = hut_world(t, feet_x=shadows)
-    return cam(img, lerp(1.45, 1.6, lt / 3), 0.5, 0.53)
+    return cam(img, lerp(1.45, 1.6, lt / 3.1), 0.5, 0.53)
 
 
 def shot_silence(t, lt):
@@ -761,12 +763,12 @@ def shot_thud(t, lt):
 def shot_lunge(t, lt):
     img = hut_world(t)
     img = to_img(np.asarray(img, np.float32) * 0.45)
-    if lt > 0.75:
-        d = ImageDraw.Draw(img)
-        k = ease((lt - 0.75) / 0.55)
+    jump = EV["lunge"] - EV["lunge_shot"]
+    if lt > jump - 0.25:
+        k = ease((lt - jump + 0.25) / 0.55)
         rim_person(img, lerp(300, 620, k), lerp(1500, 2600, k), lerp(700, 2300, k), phase=1.0, run=0.6,
                    hair=True, lean=0.5, arm_reach=(lerp(500, 900, k), lerp(1100, 1600, k)), rim=(80, 95, 120))
-    img = cam(img, 1.2, 0.5 + (0.08 * ease((lt - 1.25) / 0.4) if lt > 1.25 else 0), 0.5)
+    img = cam(img, 1.2, 0.5 + (0.08 * ease((lt - jump - 0.25) / 0.4) if lt > jump + 0.25 else 0), 0.5)
     # нож на переднем плане
     d = ImageDraw.Draw(img)
     kx, ky = 760, 1500 + (1 - ease(lt / 0.4)) * 400
@@ -795,14 +797,15 @@ def two_shot(t, girl_reach=None, me_x=330, zoom=1.12, cx=0.5, cy=0.5, girl_head_
 
 
 def shot_dialogue(t, lt):
-    return two_shot(t, zoom=lerp(1.1, 1.22, lt / 7), cx=lerp(0.48, 0.55, lt / 7), cy=0.5)
+    return two_shot(t, zoom=lerp(1.1, 1.22, lt / 4.7), cx=lerp(0.48, 0.55, lt / 4.7), cy=0.5)
 
 
 def shot_wall(t, lt):
     img = wall_bg().copy()
     d = ImageDraw.Draw(img)
     marks = 47
-    shown = int(marks * ease((t - 31.0) / 3.0))
+    t0, t1 = EV["wall"], EV["wall_text"]
+    shown = int(marks * ease((t - t0) / (t1 - t0 - 0.6)))
     for i in range(shown):
         grp, j = divmod(i, 5)
         row, col = divmod(grp, 3)
@@ -812,10 +815,10 @@ def shot_wall(t, lt):
             d.line([(x0 + j * 45, y0), (x0 + j * 45 + 10, y0 + 110)], fill=(165, 140, 112), width=7)
         else:
             d.line([(x0 - 15, y0 + 80), (x0 + 175, y0 + 25)], fill=(165, 140, 112), width=7)
-    if t > 34.3:
+    if t > t1:
         img = blood_text(img, t)
-    zoom = lerp(1.0, 1.08, ease((t - 31) / 3.3)) if t < 34.3 else lerp(1.08, 1.16, ease((t - 34.3) / 3.7))
-    cy = lerp(0.4, 0.5, ease((t - 31) / 3.3)) if t < 34.3 else lerp(0.5, 0.68, ease((t - 34.3) / 3.7))
+    zoom = lerp(1.0, 1.08, ease((t - t0) / (t1 - t0))) if t < t1 else lerp(1.08, 1.16, ease((t - t1) / 1.8))
+    cy = lerp(0.4, 0.5, ease((t - t0) / (t1 - t0))) if t < t1 else lerp(0.5, 0.68, ease((t - t1) / 1.8))
     return cam(img, zoom, 0.5, cy)
 
 
@@ -843,7 +846,7 @@ def blood_text(img, t):
         tw = ld.textlength(txt, font=f)
         ld.text(((W - tw) / 2, y), txt, font=f, fill=255)
     # раскрытие слева направо, построчно
-    k = ease((t - 34.3) / 2.0)
+    k = ease((t - EV["wall_text"]) / 1.0)
     reveal = Image.new("L", (W, H), 0)
     rd = ImageDraw.Draw(reveal)
     k1, k2 = clamp(k * 2), clamp(k * 2 - 1)
@@ -856,7 +859,7 @@ def blood_text(img, t):
     for i in range(18):
         x = r.uniform(120, 960)
         y0 = 1400 if i % 2 else 1650
-        ln = r.uniform(40, 200) * clamp((t - 35.0 - i * 0.05) / 2.5)
+        ln = r.uniform(40, 200) * clamp((t - EV["wall_text"] - 0.4 - i * 0.05) / 1.5)
         if ln > 1:
             dr.line([(x, y0), (x, y0 + ln)], fill=255, width=int(r.uniform(6, 12)))
             dr.ellipse([x - 8, y0 + ln - 6, x + 8, y0 + ln + 12], fill=255)
@@ -866,34 +869,24 @@ def blood_text(img, t):
 
 
 def shot_gap(t, lt):
-    step = int((t - 38.4) / 0.9)
-    fx = 260 + max(0, step) * 70
-    feet = [fx, fx + 90] if 38.4 < t < 44.5 and fx < 820 else None
+    step = sum(t >= q for q in EV["steps"])
+    fx = 300 + step * 110
+    feet = [fx, fx + 90] if step > 0 else None
     img = hut_world(t, feet_x=feet, gap_light=1.8, table_k=0.0)
     return cam(img, 3.0, 0.5, 0.78)
 
 
 def shot_girl_pale(t, lt):
-    img = draw_face(t, eyes_open=1.1, pale=ease(lt / 1.5), tremble=0.6, mouth=0.25 if 42.6 < t < 44.7 and int(t * 7) % 2 else 0.05)
-    return cam(img, lerp(1.05, 1.25, lt / 3.8), 0.5, 0.5)
+    img = draw_face(t, eyes_open=1.1, pale=ease(lt / 1.5), tremble=0.6, mouth=0.25 if 43.0 < t < 44.9 and int(t * 7) % 2 else 0.05)
+    return cam(img, lerp(1.05, 1.25, lt / 4.0), 0.5, 0.5)
 
 
 def shot_knock(t, lt):
     img = hut_world(t)
-    for kt in (45.0, 45.6, 46.2):
+    for kt in EV["knocks"]:
         if 0 <= t - kt < 0.15:
             img = bulge_warp(img, 0.06 * (1 - (t - kt) / 0.15), 560, 1000, 500)
-    return cam(img, lerp(1.35, 1.6, lt / 5.2), 0.5, 0.5)
-
-
-def shot_girl_silent(t, lt):
-    m = 0.0
-    if 51.4 < t < 54.6:
-        # «Не открывай»: беззвучная артикуляция
-        m = abs(math.sin((t - 51.4) * 5.2)) * 0.8
-    blink = 0.15 if 50.6 < t < 50.72 else 1.0
-    img = draw_face(t, mouth=m, eyes_open=blink, pale=1.0, tremble=0.3)
-    return cam(img, lerp(1.15, 1.45, lt / 5.0), 0.5, 0.52)
+    return cam(img, lerp(1.35, 1.6, lt / 2.8), 0.5, 0.5)
 
 
 def crack_pov(t, zoom, cy, turn=0.0, glow=0.0):
@@ -909,20 +902,20 @@ def crack_pov(t, zoom, cy, turn=0.0, glow=0.0):
 
 
 def shot_crack(t, lt):
-    return crack_pov(t, lerp(1.0, 1.15, ease(lt / 7)), lerp(0.55, 0.5, lt / 7))
+    return crack_pov(t, lerp(1.0, 1.15, ease(lt / 7.5)), lerp(0.55, 0.5, lt / 7.5))
 
 
 def shot_grab(t, lt):
-    k = ease((t - 62.2) / 0.4)
+    k = ease((t - EV["grab"]) / 0.4)
     reach = (lerp(690, 450, k), lerp(1300, 1250, k))
     return two_shot(t, girl_reach=reach, zoom=1.25, cx=0.5, cy=0.52)
 
 
 def shot_turn(t, lt):
-    turn = ease((t - 66.25) / 0.6)
-    z = lerp(1.15, 3.6, ease((t - 66.6) / 2.2))
-    glow = ease((t - 67.4) / 0.8)
-    return crack_pov(t, z, lerp(0.5, 0.34, ease((t - 66.6) / 2.2)), turn=turn, glow=glow)
+    turn = ease((t - EV["head_turn"]) / 0.6)
+    z = lerp(1.15, 3.6, ease((t - EV["head_turn"] - 0.3) / 2.0))
+    glow = ease((t - EV["glow"]) / 0.6)
+    return crack_pov(t, z, lerp(0.5, 0.34, ease((t - EV["head_turn"] - 0.3) / 2.0)), turn=turn, glow=glow)
 
 
 def shot_radio(t, lt):
@@ -930,19 +923,20 @@ def shot_radio(t, lt):
 
 
 def shot_turn_to_her(t, lt):
-    k = ease(lt / 1.7)
+    k = ease(lt / 2.5)
     return two_shot(t, zoom=lerp(1.15, 1.9, k), cx=lerp(0.4, 0.66, k), cy=lerp(0.5, 0.35, k), me_x=lerp(330, 300, k))
 
 
 def shot_blood(t, lt):
-    img = draw_face(t, blood=ease(lt / 1.3), look_up=1.0, pale=0.6, eyes_open=0.85, mouth=0.18 if int(t * 6) % 2 else 0.05)
+    talk = 76.2 < t < 78.5 and int(t * 6) % 2
+    img = draw_face(t, blood=ease((lt - 1.2) / 3.0), look_up=1.0, pale=0.6, eyes_open=0.85, mouth=0.18 if talk else 0.05)
     img = to_img(np.asarray(img, np.float32) * np.array([1.12, 0.85, 0.85], np.float32))
-    return cam(img, lerp(1.2, 1.45, lt / 1.4), 0.5, 0.45)
+    return cam(img, lerp(1.2, 1.5, lt / 4.5), 0.5, 0.45)
 
 
 def shot_door_bend(t, lt):
     img = hut_world(t)
-    k = ease(lt / 1.0)
+    k = ease(lt / 3.0)
     img = bulge_warp(img, 0.08 + 0.28 * k + 0.05 * math.sin(t * 40), 540, 1000, 600)
     d = ImageDraw.Draw(img)
     r = np.random.default_rng(23)
@@ -966,7 +960,7 @@ def shot_final(t, lt):
     d = ImageDraw.Draw(img)
     f = font(F_SERIF_B, 92)
     lines = ["НОЧЬ ТОЛЬКО", "НАЧИНАЕТСЯ…"]
-    alpha = ease(lt / 0.6) * (1 - ease((lt - 3.9) / 0.8))
+    alpha = ease(lt / 0.6) * (1 - ease((lt - 4.4) / 0.8))
     glitch = lt < 0.5 or 2.2 < lt < 2.32
     for i, ln in enumerate(lines):
         tw = d.textlength(ln, font=f)
@@ -980,14 +974,17 @@ def shot_final(t, lt):
 
 
 SHOTS = [
-    (0.0, 1.6, shot_wake), (1.6, 6.0, shot_beach), (6.0, 8.0, shot_edge),
-    (8.0, 13.2, shot_run), (13.2, 15.2, shot_pursuers), (15.2, 17.0, shot_slam),
-    (17.0, 20.0, shot_scratch), (20.0, 21.2, shot_silence), (21.2, 22.0, shot_thud),
-    (22.0, 24.0, shot_lunge), (24.0, 31.0, shot_dialogue), (31.0, 38.0, shot_wall),
-    (38.0, 41.0, shot_gap), (41.0, 44.8, shot_girl_pale), (44.8, 50.0, shot_knock),
-    (50.0, 55.0, shot_girl_silent), (55.0, 62.0, shot_crack), (62.0, 66.2, shot_grab),
-    (66.2, 69.0, shot_turn), (69.0, 74.5, shot_radio), (74.5, 76.2, shot_turn_to_her),
-    (76.2, 77.6, shot_blood), (77.6, 78.6, shot_door_bend), (78.6, FINAL_START, shot_black),
+    (0.0, 1.6, shot_wake), (1.6, 7.4, shot_beach), (7.4, EV["run"], shot_edge),
+    (EV["run"], EV["pursuers"], shot_run), (EV["pursuers"], EV["slam_shot"], shot_pursuers),
+    (EV["slam_shot"], EV["scratch_shot"], shot_slam), (EV["scratch_shot"], EV["silence"], shot_scratch),
+    (EV["silence"], EV["thud"], shot_silence), (EV["thud"], EV["lunge_shot"], shot_thud),
+    (EV["lunge_shot"], EV["dialogue"], shot_lunge), (EV["dialogue"], EV["wall"], shot_dialogue),
+    (EV["wall"], EV["gap"], shot_wall), (EV["gap"], EV["knock_shot"], shot_gap),
+    (EV["knock_shot"], EV["pale"], shot_knock), (EV["pale"], EV["crack"], shot_girl_pale),
+    (EV["crack"], EV["grab_shot"], shot_crack), (EV["grab_shot"], EV["turn_shot"], shot_grab),
+    (EV["turn_shot"], EV["radio"], shot_turn), (EV["radio"], EV["turn_her"], shot_radio),
+    (EV["turn_her"], EV["blood"], shot_turn_to_her), (EV["blood"], EV["bend"], shot_blood),
+    (EV["bend"], EV["black"], shot_door_bend), (EV["black"], FINAL_START, shot_black),
     (FINAL_START, DURATION, shot_final),
 ]
 
@@ -998,8 +995,9 @@ GRADES = {
     shot_turn: (0.9, 1.0, 1.1), shot_radio: (0.9, 1.05, 0.95),
 }
 
-FLASHES = [(13.2, (255, 30, 20), 0.25), (15.42, (255, 255, 255), 0.12), (23.0, (255, 255, 255), 0.2),
-           (34.4, (180, 0, 0), 0.4), (66.6, (255, 255, 255), 0.15), (79.2, (120, 0, 0), 0.5)]
+FLASHES = [(EV["pursuers"], (255, 30, 20), 0.25), (EV["slam"], (255, 255, 255), 0.12),
+           (EV["lunge"], (255, 255, 255), 0.2), (EV["wall_text"], (180, 0, 0), 0.4),
+           (EV["head_turn"] + 0.3, (255, 255, 255), 0.15), (EV["final"], (120, 0, 0), 0.5)]
 
 
 # ================================================================ постобработка
@@ -1021,11 +1019,11 @@ def brightness(t):
     b = 1.0
     if t < 0.4:
         b = t / 0.4
-    if 20.0 <= t < 21.2:
+    if EV["silence"] <= t < EV["thud"]:
         b *= 0.55
-    if 8.0 <= t < 13.2:  # лунные вспышки между деревьями
+    if EV["run"] <= t < EV["pursuers"]:  # лунные вспышки между деревьями
         b *= 0.85 + 0.25 * max(0, math.sin(t * 7.1) * math.sin(t * 3.3))
-    if 77.6 <= t < 78.6:
+    if EV["bend"] + 2.0 <= t < EV["black"]:
         b *= 0.6 + 0.6 * (int(t * 20) % 2)
     return b
 
