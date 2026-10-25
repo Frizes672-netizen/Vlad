@@ -102,9 +102,103 @@ def v3():
     return finish(img, "avatar_3_eyes")
 
 
+def v4():
+    """Лицо пополам: Влад — человек и зомби, посередине шов."""
+    def face(spec, zombie):
+        img, c = canvas((26, 20, 30), (8, 8, 12))
+        glow(c, 540, 500, 600, (226, 46, 46) if zombie else (24, 170, 150), alpha=18)
+        r.char(c, 540, 1760, 1400, spec, expr="angry", zombie=zombie, arms=(8, 8))
+        return img
+    human = face(r.VLAD, False)
+    zspec = dict(r.VLAD, skin=(150, 182, 128))
+    zomb = face(zspec, True)
+    m = Image.new("L", human.size, 0)
+    pts = [(1080 - 40 * (k % 2), y) for k, y in enumerate(range(0, 2161, 90))]
+    ImageDraw.Draw(m).polygon([(0, 0)] + [(x, y) for x, y in pts] + [(0, 2160)], fill=255)
+    img = Image.composite(human, zomb, m)
+    c = r.C(img)
+    for x, y in pts[1:-1]:
+        c.line([(x / 2 - 22, y / 2 - 8), (x / 2 + 22, y / 2 + 8)], (30, 20, 22), 7)
+    c.line([(x / 2, y / 2) for x, y in pts], (120, 20, 24), 5)
+    return finish(img, "avatar_4_split")
+
+
+def v5():
+    """Круглый люк бункера сверху, из щели тянется рука зомби."""
+    img, c = canvas((40, 42, 48), (20, 20, 24))
+    hazard_ring(c, 70)
+    c.ell(540, 540, 455, 455, (60, 64, 72))
+    c.ell(540, 540, 430, 430, (14, 4, 6))
+    glow(c, 540, 600, 430, (255, 30, 30), alpha=30)
+    # приоткрытая крышка
+    lx, ly = 500, 470
+    c.ell(lx, ly, 420, 420, (96, 102, 112))
+    c.ell(lx, ly, 380, 380, (118, 124, 134))
+    for k in range(16):
+        a = k * math.pi / 8
+        c.ell(lx + math.cos(a) * 398, ly + math.sin(a) * 398, 11, 11, (80, 86, 94))
+    c.ell(lx, ly, 150, 150, None, outline=(200, 40, 36), w=26)
+    for k in range(4):
+        a = k * math.pi / 4 + 0.3
+        c.line([(lx - math.cos(a) * 150, ly - math.sin(a) * 150), (lx + math.cos(a) * 150, ly + math.sin(a) * 150)],
+               (200, 40, 36), 22)
+    c.ell(lx, ly, 40, 40, (150, 30, 28))
+    # рука зомби из щели
+    green, dark = (150, 182, 128), (110, 140, 92)
+    c.line([(860, 960), (790, 780)], (120, 90, 110), 120)
+    c.ell(780, 760, 78, 68, green)
+    for i, (dx, dy, ln) in enumerate(((-70, -20, 90), (-40, -55, 120), (5, -65, 125), (50, -50, 105))):
+        x0, y0 = 780 + dx, 760 + dy
+        c.line([(x0, y0), (x0 - 20 + i * 8, y0 - ln)], green, 34)
+        c.ell(x0 - 20 + i * 8, y0 - ln, 14, 10, dark)
+    c.line([(735, 790), (690, 830)], green, 38)
+    c.ell(760, 800, 16, 12, (150, 20, 24))
+    return finish(img, "avatar_5_hatch")
+
+
+def v6():
+    """Глаз крупным планом: в зрачке отражается толпа зомби."""
+    img, c = canvas((60, 8, 12), (10, 4, 6))
+    glow(c, 540, 540, 600, (255, 40, 40), alpha=14)
+    pts_top = [(140 + k * 40, 540 - math.sin(k / 20 * math.pi) * 300) for k in range(21)]
+    pts_bot = [(940 - k * 40, 540 + math.sin(k / 20 * math.pi) * 250) for k in range(21)]
+    c.poly(pts_top + pts_bot, (238, 230, 220))
+    rng = __import__("random").Random(4)
+    for k in range(12):
+        side = rng.choice((-1, 1))
+        x, y = 540 + side * rng.uniform(300, 380), 540 + rng.uniform(-90, 90)
+        pts = [(x, y)]
+        for _ in range(5):
+            x -= side * rng.uniform(25, 45)
+            y += rng.uniform(-25, 25)
+            pts.append((x, y))
+        c.line(pts, (200, 50, 50), 4)
+    c.ell(540, 540, 220, 220, (90, 150, 70))
+    c.ell(540, 540, 220, 220, None, outline=(40, 70, 30), w=16)
+    for k in range(24):
+        a = k * math.pi / 12
+        c.line([(540 + math.cos(a) * 110, 540 + math.sin(a) * 110), (540 + math.cos(a) * 200, 540 + math.sin(a) * 200)],
+               (70, 120, 52), 6)
+    c.ell(540, 540, 120, 120, (6, 6, 8))
+    for i in range(5):
+        x = 470 + i * 35
+        h = 60 + (i % 2) * 12
+        c.ell(x, 590 - h, 13, 13, (190, 30, 30))
+        c.rect(x - 12, 590 - h + 10, x + 12, 590, (190, 30, 30), r=6)
+        c.line([(x - 12, 590 - h + 18), (x - 24, 590 - h - 8)], (190, 30, 30), 7)
+        c.line([(x + 12, 590 - h + 18), (x + 24, 590 - h - 8)], (190, 30, 30), 7)
+    c.ell(585, 485, 34, 24, (255, 255, 255))
+    c.ell(500, 600, 12, 9, (255, 255, 255, 160))
+    c.line([pt for pt in pts_top], (30, 10, 12), 26)
+    for k in range(3, 18, 2):
+        x, y = pts_top[k]
+        c.line([(x, y), (x + (k - 10) * 4, y - 60)], (30, 10, 12), 10)
+    return finish(img, "avatar_6_eye")
+
+
 if __name__ == "__main__":
-    previews = [v1(), v2(), v3()]
-    sheet = Image.new("RGB", (SIZE * 3 + 80, SIZE + 40), (255, 255, 255))
+    previews = [v1(), v2(), v3(), v4(), v5(), v6()]
+    sheet = Image.new("RGB", (SIZE * 3 + 80, SIZE * 2 + 60), (255, 255, 255))
     for i, p in enumerate(previews):
-        sheet.paste(p, (20 + i * (SIZE + 20), 20))
+        sheet.paste(p, (20 + i % 3 * (SIZE + 20), 20 + i // 3 * (SIZE + 20)))
     sheet.resize((sheet.width // 2, sheet.height // 2), Image.LANCZOS).save(os.path.join(HERE, "preview_circles.jpg"), quality=90)
