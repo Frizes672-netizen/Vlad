@@ -112,9 +112,102 @@ def v4():
     return finish(img, "avatar_4_expose")
 
 
+def coin(c, cx, cy, rad, label, size, crack=True):
+    c.ell(cx + 12, cy + 16, rad, rad, (0, 0, 0, 120))
+    c.ell(cx, cy, rad, rad, (196, 152, 76))
+    c.ell(cx, cy, rad * 0.92, rad * 0.92, GOLD)
+    for k in range(72):
+        a = k * math.pi / 36
+        c.line([(cx + math.cos(a) * rad * 0.94, cy + math.sin(a) * rad * 0.94),
+                (cx + math.cos(a) * rad * 0.985, cy + math.sin(a) * rad * 0.985)], (160, 120, 56), 4)
+    c.ell(cx, cy, rad * 0.8, rad * 0.8, None, outline=(170, 130, 62), w=6)
+    c.text(cx, cy - rad * 0.05, label, r.F("pf", size, 900), (120, 86, 36))
+    if crack:
+        k = rad / 360
+        pts = [(cx - 70 * k, cy - 360 * k), (cx - 20 * k, cy - 210 * k), (cx - 60 * k, cy - 110 * k),
+               (cx + 40 * k, cy + 20 * k), (cx - 10 * k, cy + 140 * k), (cx + 60 * k, cy + 260 * k), (cx + 30 * k, cy + 360 * k)]
+        c.line(pts, (10, 12, 22), 22 * k)
+        c.line([pts[3], (cx + 160 * k, cy + 70 * k)], (10, 12, 22), 12 * k)
+        c.line([pts[1], (cx - 120 * k, cy - 180 * k)], (10, 12, 22), 10 * k)
+
+
+def ring_text(img, cx, cy, rad, text, size, col, start=-90, span=300, bottom=False):
+    """Надпись по окружности (буквы поворачиваются по касательной)."""
+    f = r.F("ms", size * r.S, 800)
+    n = len(text)
+    for i, ch in enumerate(text):
+        if ch == " ":
+            continue
+        a = math.radians(start - span / 2 + span * (i + 0.5) / n)
+        x, y = cx + math.cos(a) * rad, cy + math.sin(a) * rad
+        tile = Image.new("RGBA", (size * 2 * r.S, size * 2 * r.S), (0, 0, 0, 0))
+        ImageDraw.Draw(tile).text((size * r.S, size * r.S), ch, font=f, fill=col, anchor="mm")
+        rot = -math.degrees(a) + 90 if bottom else -math.degrees(a) - 90
+        tile = tile.rotate(rot, Image.BICUBIC)
+        img.paste(tile, (int(x * r.S - size * r.S), int(y * r.S - size * r.S)), tile)
+
+
+def cc_coin():
+    """Монограмма CC на треснувшей монете."""
+    img, c = canvas(glow_col=(90, 70, 30))
+    coin(c, 540, 540, 360, "CC", 300)
+    return finish(img, "capital_crimes_avatar_coin")
+
+
+def cc_emblem():
+    """Эмблема: кольцо с названием, монограмма и обвал графика."""
+    img, c = canvas(glow_col=(80, 60, 30))
+    c.ell(540, 540, 470, 470, None, outline=GOLD, w=10)
+    c.ell(540, 540, 330, 330, None, outline=GOLD + (160,), w=4)
+    ring_text(img, 540, 540, 400, "CAPITAL CRIMES", 64, GOLD_L, start=-90, span=150)
+    ring_text(img, 540, 540, 400, "MONEY · POWER · FRAUD", 34, CREAM, start=90, span=-110, bottom=True)
+    c = r.C(img)
+    c.text(540, 520, "CC", r.F("pf", 330, 900), GOLD_L)
+    crash_line(c, [(250, 720), (380, 620), (480, 660), (600, 500), (690, 560), (780, 760)], w=18)
+    return finish(img, "capital_crimes_avatar_emblem")
+
+
+def banner():
+    """Шапка канала 2560×1440; надписи — в безопасной зоне 1546×423 по центру."""
+    BW, BH = 2560, 1440
+    a = r.grad((14, 20, 40), (4, 6, 12), w=BW, h=BH)
+    a += r.radial(640, 720, 900, w=BW, h=BH)[:, :, None] * r.np.array([70, 55, 25], r.np.float32)
+    img = r.to_img(a)
+    d = ImageDraw.Draw(img, "RGBA")
+    rng = r.np.random.default_rng(3)
+    x = 0
+    while x < BW:
+        w = rng.uniform(60, 150)
+        h = rng.uniform(250, 620)
+        d.rectangle([x, BH - h, x + w, BH], fill=(18, 24, 42))
+        for wy in range(int(BH - h + 20), BH - 10, 34):
+            for wx in range(int(x + 10), int(x + w - 10), 26):
+                if rng.random() < 0.35:
+                    d.rectangle([wx, wy, wx + 12, wy + 16], fill=(200, 160, 90, 150))
+        x += w + 8
+    pts = [(0, 1000), (300, 940), (600, 980), (900, 930), (1150, 960), (1400, 935), (1600, 960), (1750, 940),
+           (1900, 1020), (2100, 1120), (2300, 1300), (2560, 1400)]
+    d.line(pts, fill=(214, 48, 52, 170), width=10, joint="curve")
+    d.text((BW / 2, 650), "CAPITAL CRIMES", font=r.PF(170, 900), fill=GOLD_L, anchor="mm")
+    d.line([(BW / 2 - 420, 765), (BW / 2 + 420, 765)], fill=GOLD, width=4)
+    d.text((BW / 2, 830), "BILLION-DOLLAR COLLAPSES  ·  FRAUDS  ·  FORTUNES", font=r.MS(44, 600), fill=CREAM, anchor="mm")
+    img.save(os.path.join(HERE, "capital_crimes_banner.png"))
+    prev = img.resize((BW // 2, BH // 2), Image.LANCZOS)
+    pd = ImageDraw.Draw(prev)
+    sx, sy = (BW - 1546) / 4, (BH - 423) / 4
+    pd.rectangle([sx, sy, sx + 1546 / 2, sy + 423 / 2], outline=(255, 255, 255), width=2)
+    prev.save(os.path.join(HERE, "banner_preview_safe_area.jpg"), quality=88)
+
+
 if __name__ == "__main__":
     previews = [v1(), v2(), v3(), v4()]
     sheet = Image.new("RGB", (SIZE * 4 + 100, SIZE + 40), (255, 255, 255))
     for i, p in enumerate(previews):
         sheet.paste(p, (20 + i * (SIZE + 20), 20))
     sheet.resize((sheet.width // 2, sheet.height // 2), Image.LANCZOS).save(os.path.join(HERE, "preview_circles.jpg"), quality=90)
+    brand = [cc_coin(), cc_emblem()]
+    sheet = Image.new("RGB", (SIZE * 2 + 60, SIZE + 40), (255, 255, 255))
+    for i, p in enumerate(brand):
+        sheet.paste(p, (20 + i * (SIZE + 20), 20))
+    sheet.resize((sheet.width // 2, sheet.height // 2), Image.LANCZOS).save(os.path.join(HERE, "capital_crimes_preview.jpg"), quality=90)
+    banner()
