@@ -1,8 +1,8 @@
 """Аватарки «CC» на фото автора (youtube_finance/photos/*.jpg). 1080×1080 PNG.
 
-1) hoodie: надпись на худи заменяется на «CC / Capital Crimes»;
-2) forest: светящиеся «CC» в лучах;
-3) knight: золотые «CC» в закатном небе.
+1) hoodie: надпись на худи заменяется на «CC / Capital Crimes / by Frizes»;
+2) forest: светящиеся «CC» и «Frizes» в лучах;
+3) knight: золотые «CC» и «Frizes» в закатном небе.
 Запуск из корня репозитория: python3 youtube_finance/make_cc_photos.py
 """
 import os
@@ -76,7 +76,8 @@ def hoodie():
     img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
     # 2) печатаем «CC / Capital Crimes» в том же стиле и с тем же наклоном
     items = [(428, 466, "CC", ImageFont.truetype(SERIF, 58), (178, 178, 182, 235)),
-             (430, 505, "Capital Crimes", ImageFont.truetype(SERIF, 21), (168, 168, 172, 225))]
+             (430, 505, "Capital Crimes", ImageFont.truetype(SERIF, 21), (168, 168, 172, 225)),
+             (432, 531, "by Frizes", ImageFont.truetype(SERIF, 15), (150, 150, 156, 215))]
     lay = text_layer(img.size, items, angle=2.2).filter(ImageFilter.GaussianBlur(0.5))
     img.paste(lay, (0, 0), lay)
     img = square(img, 130).resize((OUT, OUT), Image.LANCZOS)
@@ -87,7 +88,8 @@ def hoodie():
 def forest():
     img = Image.open(os.path.join(PH, "forest.jpg")).convert("RGB")
     img = square(img, 140)
-    items = [(600, 560, "CC", playfair(300, 800), (255, 250, 236, 235))]
+    items = [(600, 560, "CC", playfair(300, 800), (255, 250, 236, 235)),
+             (600, 775, "Frizes", playfair(64, 500), (255, 250, 236, 225))]
     img = glow_text(img, items, 18, 0.35)
     img = img.resize((OUT, OUT), Image.LANCZOS)
     img.save(os.path.join(HERE, "cc_photo_2_forest.png"))
@@ -97,7 +99,8 @@ def forest():
 def knight():
     img = Image.open(os.path.join(PH, "knight.jpg")).convert("RGB")
     img = square(img, 110)
-    items = [(560, 230, "CC", playfair(250, 800), (255, 214, 150, 250))]
+    items = [(560, 230, "CC", playfair(250, 800), (255, 214, 150, 250)),
+             (560, 380, "Frizes", playfair(54, 500), (255, 214, 150, 235))]
     lay = text_layer(img.size, items)
     glow = Image.new("RGB", img.size)
     glow.paste(Image.new("RGB", img.size, (230, 120, 40)), (0, 0), lay)
