@@ -112,9 +112,33 @@ def knight():
     return img
 
 
+def forest_banner():
+    """Шапка канала 2560×1440 из фото леса; надписи в безопасной зоне 1546×423."""
+    BW, BH = 2560, 1440
+    src = Image.open(os.path.join(PH, "forest.jpg")).convert("RGB")
+    k = BW / src.width
+    big = src.resize((BW, int(src.height * k)), Image.LANCZOS).filter(ImageFilter.UnsharpMask(2, 60, 2))
+    img = big.crop((0, 880, BW, 880 + BH))
+    a = np.asarray(img, np.float32)
+    ys = np.linspace(-1, 1, BH)[:, None]
+    xs = np.linspace(-1, 1, BW)[None, :]
+    a *= np.clip(1.15 - (xs ** 2 * 0.35 + ys ** 2 * 0.45), 0.55, 1)[:, :, None]
+    img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
+    items = [(BW // 2, 660, "CC", playfair(260, 800), (255, 250, 236, 240)),
+             (BW // 2, 845, "by Frizes", playfair(64, 500), (255, 250, 236, 230))]
+    img = glow_text(img, items, 18, 0.35)
+    img.save(os.path.join(HERE, "cc_forest_banner.png"))
+    prev = img.resize((BW // 2, BH // 2), Image.LANCZOS)
+    d = ImageDraw.Draw(prev)
+    sx, sy = (BW - 1546) / 4, (BH - 423) / 4
+    d.rectangle([sx, sy, sx + 1546 / 2, sy + 423 / 2], outline=(255, 255, 255), width=2)
+    prev.save(os.path.join(HERE, "cc_forest_banner_safe_area.jpg"), quality=90)
+
+
 if __name__ == "__main__":
     prevs = [circle_preview(f()) for f in (hoodie, forest, knight)]
     sheet = Image.new("RGB", (OUT * 3 + 80, OUT + 40), (235, 235, 235))
     for i, p in enumerate(prevs):
         sheet.paste(p, (20 + i * (OUT + 20), 20))
     sheet.resize((sheet.width // 2, sheet.height // 2), Image.LANCZOS).save(os.path.join(HERE, "cc_photo_preview.jpg"), quality=90)
+    forest_banner()
