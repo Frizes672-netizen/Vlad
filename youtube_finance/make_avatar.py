@@ -199,6 +199,31 @@ def banner():
     prev.save(os.path.join(HERE, "banner_preview_safe_area.jpg"), quality=88)
 
 
+def banner_white():
+    """Простая шапка на белом фоне 2560×1440; всё в безопасной зоне 1546×423."""
+    BW, BH = 2560, 1440
+    img = Image.new("RGB", (BW, BH), (255, 255, 255))
+    d = ImageDraw.Draw(img)
+    navy = (16, 24, 48)
+    d.text((BW / 2, 650), "CAPITAL CRIMES", font=r.PF(170, 900), fill=navy, anchor="mm")
+    # золотая линия, переходящая в красный обвал
+    y = 770
+    d.line([(BW / 2 - 470, y), (BW / 2 + 300, y)], fill=GOLD, width=5)
+    pts = [(BW / 2 + 300, y), (BW / 2 + 350, y - 26), (BW / 2 + 400, y + 4), (BW / 2 + 450, y + 34)]
+    d.line(pts, fill=RED, width=7, joint="curve")
+    a = math.atan2(pts[-1][1] - pts[-2][1], pts[-1][0] - pts[-2][0])
+    tip = (pts[-1][0] + math.cos(a) * 26, pts[-1][1] + math.sin(a) * 26)
+    d.polygon([tip, (pts[-1][0] + math.cos(a + 2.4) * 22, pts[-1][1] + math.sin(a + 2.4) * 22),
+               (pts[-1][0] + math.cos(a - 2.4) * 22, pts[-1][1] + math.sin(a - 2.4) * 22)], fill=RED)
+    d.text((BW / 2, 880), "BILLION-DOLLAR COLLAPSES  ·  FRAUDS  ·  FORTUNES", font=r.MS(42, 600), fill=(90, 96, 112), anchor="mm")
+    img.save(os.path.join(HERE, "capital_crimes_banner_white.png"))
+    prev = img.resize((BW // 2, BH // 2), Image.LANCZOS)
+    pd = ImageDraw.Draw(prev)
+    sx, sy = (BW - 1546) / 4, (BH - 423) / 4
+    pd.rectangle([sx, sy, sx + 1546 / 2, sy + 423 / 2], outline=(200, 200, 200), width=2)
+    prev.save(os.path.join(HERE, "banner_white_preview_safe_area.jpg"), quality=90)
+
+
 if __name__ == "__main__":
     previews = [v1(), v2(), v3(), v4()]
     sheet = Image.new("RGB", (SIZE * 4 + 100, SIZE + 40), (255, 255, 255))
@@ -211,3 +236,4 @@ if __name__ == "__main__":
         sheet.paste(p, (20 + i * (SIZE + 20), 20))
     sheet.resize((sheet.width // 2, sheet.height // 2), Image.LANCZOS).save(os.path.join(HERE, "capital_crimes_preview.jpg"), quality=90)
     banner()
+    banner_white()
