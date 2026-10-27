@@ -1,8 +1,8 @@
 """Аватарки «CC» на фото автора (youtube_finance/photos/*.jpg). 1080×1080 PNG.
 
 1) hoodie: надпись на худи заменяется на «CC / Capital Crimes / by Frizes»;
-2) forest: светящиеся «CC» и «Frizes» в лучах;
-3) knight: золотые «CC» и «Frizes» в закатном небе.
+2) forest: светящиеся «CC» и «by Frizes» в лучах;
+3) knight: золотые «CC» и «by Frizes» в закатном небе.
 Запуск из корня репозитория: python3 youtube_finance/make_cc_photos.py
 """
 import os
@@ -89,7 +89,7 @@ def forest():
     img = Image.open(os.path.join(PH, "forest.jpg")).convert("RGB")
     img = square(img, 140)
     items = [(600, 560, "CC", playfair(300, 800), (255, 250, 236, 235)),
-             (600, 775, "Frizes", playfair(64, 500), (255, 250, 236, 225))]
+             (600, 775, "by Frizes", playfair(64, 500), (255, 250, 236, 225))]
     img = glow_text(img, items, 18, 0.35)
     img = img.resize((OUT, OUT), Image.LANCZOS)
     img.save(os.path.join(HERE, "cc_photo_2_forest.png"))
@@ -100,7 +100,7 @@ def knight():
     img = Image.open(os.path.join(PH, "knight.jpg")).convert("RGB")
     img = square(img, 110)
     items = [(560, 230, "CC", playfair(250, 800), (255, 214, 150, 250)),
-             (560, 380, "Frizes", playfair(54, 500), (255, 214, 150, 235))]
+             (560, 380, "by Frizes", playfair(54, 500), (255, 214, 150, 235))]
     lay = text_layer(img.size, items)
     glow = Image.new("RGB", img.size)
     glow.paste(Image.new("RGB", img.size, (230, 120, 40)), (0, 0), lay)
