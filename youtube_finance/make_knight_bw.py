@@ -4,10 +4,10 @@
 import os
 
 import numpy as np
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-PLAYFAIR = os.path.join(HERE, "..", "president", "fonts", "PlayfairDisplay[wght].ttf")
+CINZEL = os.path.join(HERE, "..", "president", "fonts", "CinzelDecorative-Bold.ttf")
 OUT = 1080
 
 
@@ -16,19 +16,25 @@ def main():
     w = src.width
     top = 290                                   # квадрат: небо сверху, рыцарь по центру
     img = src.crop((0, top, w, top + w)).resize((OUT, OUT), Image.LANCZOS)
-    f = ImageFont.truetype(PLAYFAIR, 84)
-    f.set_variation_by_axes([600])
-    lay = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    ImageDraw.Draw(lay).text((OUT // 2, 150), "by Frizes", font=f, fill=(242, 242, 238, 245), anchor="mm")
-    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    shadow.paste((0, 0, 0, 200), (0, 0), lay.split()[3])
-    shadow = shadow.filter(ImageFilter.GaussianBlur(10))
-    glow = Image.new("RGB", img.size)
-    glow.paste((255, 255, 255), (0, 0), lay.split()[3])
-    glow = glow.filter(ImageFilter.GaussianBlur(18))
-    img = ImageChops.add(img, Image.fromarray((np.asarray(glow, np.float32) * 0.25).astype(np.uint8)))
-    img.paste(shadow, (0, 4), shadow)
-    img.paste(lay, (0, 0), lay)
+    f = ImageFont.truetype(CINZEL, 104)
+    mask = Image.new("L", img.size, 0)
+    ImageDraw.Draw(mask).text((OUT // 2, 155), "by Frizes", font=f, fill=255, anchor="mm")
+    m = np.asarray(mask, np.float32)[:, :, None] / 255
+    a = np.asarray(img, np.float32)
+
+    def blur(r):
+        return np.asarray(mask.filter(ImageFilter.GaussianBlur(r)), np.float32)[:, :, None] / 255
+
+    # свет: широкий мягкий ореол + яркое ближнее свечение
+    a = a + blur(50) * 140 * np.array([1.0, 0.98, 0.92]) + blur(18) * 70 * np.array([1.0, 0.99, 0.95])
+    # тень под буквами держит контур внутри ореола
+    a = a * (1 - blur(4) * 0.55)
+    # буквы: перелив от белого сверху к серебру снизу и блик по центру
+    ys = np.linspace(0, 1, OUT)[:, None, None]
+    band = np.clip(1 - np.abs(ys - 155 / OUT) * OUT / 60, 0, 1)
+    letters = np.array([255, 253, 245], np.float32) * (0.82 + 0.18 * band)
+    a = a * (1 - m) + letters * m
+    img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
     img.save(os.path.join(HERE, "frizes_knight_avatar.png"))
     m = Image.new("L", img.size, 0)
     ImageDraw.Draw(m).ellipse([0, 0, OUT, OUT], fill=255)
