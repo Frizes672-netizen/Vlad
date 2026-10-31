@@ -786,8 +786,8 @@ def bg_school(d, c):
             c.rect(58 + i * 88, 105 + j * 105, 62 + i * 88, 175 + j * 105, (230, 226, 216))
     c.rect(330, 250, 470, 330, (120, 82, 60))
     c.rect(-10, 330, 820, 610, (128, 124, 118))            # асфальт
-    for k in range(4):                                     # деревья
-        x = [20, 210, 600, 760][k]
+    for k in range(3):                                     # деревья (не там, где стоят люди)
+        x = [250, 470, 560][k]
         c.rect(x - 6, 200, x + 6, 340, (80, 62, 46))
         c.ell(x, 190, 70, 80, (88, 112, 64))
         c.ell(x - 30, 220, 50, 50, (76, 100, 56))
@@ -821,10 +821,16 @@ def bg_sea(d, c):
     for k in range(12):
         c.line([(k * 70, 260 + k % 3 * 30), (k * 70 + 40, 260 + k % 3 * 30)], (170, 200, 214), 2)
     c.rect(-10, 380, 820, 610, (214, 196, 160))
-    c.poly([(470, 330), (820, 300), (820, 318), (470, 342)], (110, 90, 70))   # пирс
-    for i in range(6):
-        x = 490 + i * 60
-        c.rect(x, 336 - i * 4, x + 5, 384 - i * 4, (90, 72, 56))
+    for i in range(8):                                     # сваи в воде
+        x = 480 + i * 46
+        c.rect(x, 344, x + 8, 392, (70, 56, 44))
+    c.rect(460, 326, 820, 346, (128, 104, 80))              # настил пирса
+    c.rect(460, 342, 820, 348, (90, 72, 56))
+    for i in range(462, 820, 14):
+        c.line([(i, 327), (i, 341)], (110, 88, 66), 1)
+    c.rect(460, 290, 820, 294, (90, 72, 56))                # перила
+    for i in range(8):
+        c.rect(470 + i * 48, 290, 474 + i * 48, 328, (90, 72, 56))
 
 
 def bg_room(d, c, wall=(196, 170, 140)):
@@ -834,8 +840,13 @@ def bg_room(d, c, wall=(196, 170, 140)):
         c.rect(i, 0, i + 2, 420, mix(wall, (255, 255, 255), 0.1))
     c.rect(-10, 420, 820, 610, (120, 80, 54))
     c.rect(540, 80, 760, 330, (150, 180, 200))
+    c.rect(540, 250, 760, 330, (120, 118, 112))            # улица за окном: тротуар
+    c.rect(540, 170, 600, 250, (180, 176, 168))            # дом напротив
+    c.ell(720, 200, 40, 50, (90, 116, 66))                 # дерево за окном
+    c.rect(717, 230, 723, 262, (80, 62, 46))
     c.rect(646, 80, 654, 330, (230, 226, 216))
     c.rect(530, 70, 770, 90, (230, 226, 216))
+    c.rect(530, 326, 770, 340, (230, 226, 216))            # подоконник
 
 
 def bg_park(d, c, winter=False):
@@ -843,9 +854,7 @@ def bg_park(d, c, winter=False):
     d._image.paste(to_img(sky))
     ground = (236, 238, 240) if winter else (110, 140, 76)
     c.rect(-10, 330, 820, 610, ground)
-    r = np.random.default_rng(5 if winter else 6)
-    for k in range(8):
-        x = r.uniform(0, 800)
+    for x in (250, 340, 450, 550):
         c.rect(x - 5, 200, x + 5, 340, (70, 56, 44))
         c.ell(x, 190, 60, 90, (200, 206, 212) if winter else (70, 104, 56))
 
@@ -857,12 +866,12 @@ BG = dict(school=bg_school, zags=bg_zags, sea=bg_sea, room=bg_room, park=bg_park
 # Каталог снимков: фон, люди (вид, x, ноги, рост, поза-параметры), позиция незнакомца, где бабушка.
 # Незнакомец: (x, feet, h, вид, поза: 'stand' | 'sit' | 'cam')
 PHOTOS = {
-    "first_class": dict(bg="school", tone="90s", date="'90 9 1", man=(706, 300, 118, "cam"),
+    "first_class": dict(bg="school", tone="90s", date="'90 9 1", man=(700, 372, 130, "cam"),
                         people=[("boy", 360, 560, 300, "front"), ("grandma", 150, 575, 390, "gaze")]),
     "wedding": dict(bg="zags", tone="2000s", date="'05 6 18", man=(70, 382, 124, "stand"),
                     people=[("suit", 420, 575, 420, "front"), ("bride", 530, 575, 400, "front"),
                             ("grandma", 690, 580, 380, "gaze")]),
-    "sea": dict(bg="sea", tone="2000s", date="'11 7 23", man=(640, 330, 84, "sit"),
+    "sea": dict(bg="sea", tone="2000s", date="'11 7 23", man=(660, 333, 96, "stand"),
                 people=[("dad", 300, 590, 400, "front"), ("woman", 420, 590, 380, "front"),
                         ("kid", 360, 594, 220, "front"), ("grandma", 120, 594, 360, "gaze")]),
 }
@@ -954,11 +963,11 @@ def extra_photo(i):
     BG[bg](d, c)
     left = r.random() < 0.5
     mx = r.uniform(60, 180) if left else r.uniform(620, 740)
-    feet = 340 if bg != "room" else 430
-    mh = 120 if bg != "room" else 160
+    feet = {"school": 372, "sea": 412, "park": 352, "winter": 352}.get(bg, 352)
+    mh = 120
     if bg == "room":
-        mx = 650          # за окном / в дверях
-        feet, mh = 330, 110
+        mx = 690          # на улице за окном
+        feet, mh = 300, 80
     J = stranger(d, mx, feet, mh, "stand" if r.random() < 0.6 else "cam", f=1 if left else -1, age=man_age(year))
     kinds = ["dad", "woman", "kid", "suit", "boy"]
     n = int(r.integers(2, 4))
