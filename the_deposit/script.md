@@ -1,32 +1,32 @@
-# Short "The Deposit" (~2 min, English audience, money mystery)
+# Short "The Deposit" (~1:30, English audience, money mystery)
 
-## Voiceover (paste into ElevenLabs as is — numbers are spelled out on purpose)
+## Voiceover (~1:30, paste into ElevenLabs as is — numbers are spelled out on purpose)
 
-For twenty-two years, someone deposited exactly one thousand and thirteen dollars into my mom's bank account. Every month. No name. Just one word in the memo: "Sorry." Last month, the deposit was different. It was one million dollars.
+For twenty-two years, someone sent my mom exactly one thousand and thirteen dollars. Every month. No name. Just one word: "Sorry." Last month, they sent one million dollars.
 
-My mom never spent a cent of it. She kept it in a separate account. When I was a kid, I saw the name on the statement. She had called it "Evidence."
+Mom never spent a cent. She kept it in a separate account. She called it "Evidence."
 
-The first deposit arrived one month after my dad's funeral. He was killed by a drunk driver in two thousand three. The driver hit him, and drove away. He was never found.
+The first payment came one month after my dad's funeral. A drunk driver hit him in two thousand three and drove away. He was never found.
 
-I never thought about the number. One thousand and thirteen. Until I looked at the date on Dad's headstone. October thirteenth. Ten, thirteen.
+I never thought about the number. Until I looked at Dad's headstone. October thirteenth. Ten, thirteen.
 
-Whoever was sending the money… knew exactly what they had done.
+Whoever sent the money knew exactly what they had done.
 
-The million came with a longer message: "This is the last one. Please don't hate me." I called the bank. They wouldn't tell me anything. But the wire came from an estate. Someone had died. And left everything… to my mom.
+The million came with a note: "This is the last one. Please don't hate me." It came from an estate. Someone had died and left everything to my mom.
 
-I knew the name the second I read it. Raymond Cole. Uncle Ray. My dad's best friend.
+I knew the name instantly. Raymond Cole. Uncle Ray. Dad's best friend.
 
-The man who never missed one of my birthdays. Who paid for my college "because your dad would have wanted it." The man who never drove a car. Not once since two thousand three. He took the bus everywhere, even in the snow. Everyone thought it was just a quirk.
+He never missed my birthday. He paid for my college. And he never drove a car. Not once since two thousand three. Even in the snow, he took the bus.
 
-I drove to my mom's house with the bank letter in my hand. She read it, folded it, and said:
+I showed Mom the letter. She just said:
 
 "I know. I've known for twenty years."
 
 "Then why didn't you turn him in?"
 
-She looked at the photo of Dad on the wall. "Because he paid every month. And because when you needed a father… he was the only one who showed up."
+She looked at Dad's photo. "Because when you needed a father… he was the only one who showed up."
 
-She never touched the money. Not one dollar.
+She never touched the money.
 
 Would you have forgiven him?
 
@@ -60,30 +60,30 @@ mystery deposit, $1013 every month, million dollar inheritance, hit and run stor
 
 ## Перевод на русский
 
-Двадцать два года кто-то переводил на мамин счёт ровно тысячу тринадцать долларов. Каждый месяц. Без имени. В назначении платежа — одно слово: «Прости». В прошлом месяце перевод был другим. Миллион долларов.
+Двадцать два года кто-то присылал моей маме ровно тысячу тринадцать долларов. Каждый месяц. Без имени. Одно слово: «Прости». В прошлом месяце прислали миллион долларов.
 
-Мама не потратила ни цента. Она держала эти деньги на отдельном счёте. В детстве я увидел его название в выписке. Она назвала его «Улики».
+Мама не потратила ни цента. Она держала деньги на отдельном счёте. Назвала его «Улики».
 
-Первый перевод пришёл через месяц после похорон отца. Его сбил пьяный водитель в 2003 году. Сбил — и уехал. Его так и не нашли.
+Первый перевод пришёл через месяц после похорон отца. В 2003 году его сбил пьяный водитель и уехал. Его так и не нашли.
 
-Я никогда не задумывался о сумме. Тысяча тринадцать. Пока не посмотрел на дату на папином надгробии. Тринадцатое октября. Десять, тринадцать.
+Я никогда не задумывался о сумме. Пока не посмотрел на папино надгробие. Тринадцатое октября. Десять, тринадцать.
 
-Тот, кто присылал деньги… точно знал, что сделал.
+Тот, кто присылал деньги, точно знал, что сделал.
 
-С миллионом пришло сообщение подлиннее: «Это последний. Пожалуйста, не ненавидьте меня». Я позвонил в банк. Мне ничего не сказали. Но перевод пришёл из наследства. Кто-то умер. И оставил всё… моей маме.
+С миллионом пришла записка: «Это последний. Пожалуйста, не ненавидьте меня». Деньги пришли из наследства. Кто-то умер и оставил всё моей маме.
 
-Я узнал имя, как только прочитал его. Рэймонд Коул. Дядя Рэй. Лучший друг моего отца.
+Я сразу узнал имя. Рэймонд Коул. Дядя Рэй. Лучший друг отца.
 
-Человек, который не пропустил ни одного моего дня рождения. Который оплатил мой колледж, «потому что твой папа этого бы хотел». Человек, который никогда не садился за руль. Ни разу с 2003 года. Он везде ездил на автобусе, даже в снег. Все думали, что это просто причуда.
+Он не пропустил ни одного моего дня рождения. Оплатил мой колледж. И никогда не садился за руль. Ни разу с 2003 года. Даже в снег ездил на автобусе.
 
-Я поехал к маме с письмом из банка. Она прочитала, сложила его и сказала:
+Я показал маме письмо. Она только сказала:
 
 «Я знаю. Я знаю уже двадцать лет».
 
 «Тогда почему ты не сдала его полиции?»
 
-Она посмотрела на фото папы на стене. «Потому что он платил каждый месяц. И потому что, когда тебе нужен был отец… пришёл только он».
+Она посмотрела на фото папы. «Потому что, когда тебе нужен был отец… пришёл только он».
 
-Она так и не тронула эти деньги. Ни доллара.
+Она так и не тронула эти деньги.
 
 А вы бы его простили?
