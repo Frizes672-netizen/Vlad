@@ -693,8 +693,9 @@ PALETTE = dict(
 )
 
 
-def shaded(img, parts, pal, feet=None, light=(-1.0, -0.5), s=PS, shadow=0.35):
+def shaded(img, parts, pal, feet=None, light=(-1.0, -0.5), s=None, shadow=0.35):
     """Фигура со светотенью: градиент освещения, светлая кромка, мягкая тень на земле."""
+    s = s or PS        # масштаб текущего растра (снимки бывают ×2, ×3, ×4)
     xs = []
     for kind_, geo, _ in parts:
         if kind_ == "poly":
@@ -1031,8 +1032,9 @@ def place_photo(world, img, cx, cy, width, ang=0.0, shadow=True, alpha=1.0):
 
     def to_world(u, vv, border=0):
         # u, vv — координаты в системе снимка (PW×PH) без рамки
-        bx = (u + border) * PS * k / S - sm.width / S / 2
-        by = (vv + border) * PS * k / S - sm.height / S / 2
+        ps = img.width / (PW + 2 * border)          # масштаб растра этого снимка
+        bx = (u + border) * ps * k / S - sm.width / S / 2
+        by = (vv + border) * ps * k / S - sm.height / S / 2
         r = math.radians(-ang)
         return cx + bx * math.cos(r) - by * math.sin(r), cy + bx * math.sin(r) + by * math.cos(r)
     return to_world
