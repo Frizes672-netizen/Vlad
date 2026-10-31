@@ -1810,11 +1810,16 @@ def main():
             Image.frombytes("RGB", (W, H), frame(int(float(s) * FPS))).save(f"{out}_{s}.jpg", quality=86)
         return
     total = int(DURATION * FPS)
+    first, last = 0, total
+    if "--range" in sys.argv:
+        i = sys.argv.index("--range")
+        first, last = int(sys.argv[i + 1]), min(total, int(sys.argv[i + 2]))
     ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
                            "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-", "-c:v", "libx264", "-preset", "medium",
                            "-crf", "19", "-pix_fmt", "yuv420p", out], stdin=subprocess.PIPE)
-    with Pool() as pool:
-        for n, buf in enumerate(pool.imap(frame, range(total), chunksize=4)):
+    # 3 процесса и перезапуск воркеров: кэши сцен не раздувают память до OOM
+    with Pool(3, maxtasksperchild=60) as pool:
+        for n, buf in enumerate(pool.imap(frame, range(first, last), chunksize=4), first):
             ff.stdin.write(buf)
             if n % (FPS * 10) == 0:
                 print(f"  кадр {n}/{total}", flush=True)
