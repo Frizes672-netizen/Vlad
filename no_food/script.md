@@ -1,34 +1,28 @@
-# Short "382 Days Without Food" (~1:30, US YouTube)
+# Short "382 Days Without Food" (~1:00, US YouTube)
 
-## Voiceover (paste into ElevenLabs as is — numbers are spelled out on purpose)
+## Voiceover (~1:00, paste into ElevenLabs as is — numbers are spelled out on purpose)
 
 What happens if you don't eat… for three hundred eighty-two days?
 
-In nineteen sixty-five, a twenty-seven-year-old man walked into a hospital in Scotland. His name was Angus Barbieri. He weighed four hundred fifty-six pounds. And he asked the doctors for something insane: "Let me stop eating."
-
-They agreed to a short fast. A few days. Maybe a week.
+In nineteen sixty-five, a four-hundred-fifty-six-pound man walked into a hospital in Scotland. His name was Angus Barbieri. He asked the doctors: "Let me stop eating." They agreed. For a few days.
 
 He never stopped.
 
-Day one. Hunger. Headaches. Every smell is torture.
+Day one. Hunger. Headaches.
 
-Day three. The hunger fades. His body runs out of sugar and starts burning his own fat for fuel.
+Day three. The hunger fades. His body starts burning its own fat.
 
-Week two. He feels lighter. Clearer. He goes back to work at his family's fish and chip shop. Frying food he can't eat.
+Week two. He goes back to work at his family's fish and chip shop. Frying food he can't eat.
 
-He lives on water, tea, black coffee, and vitamins. Doctors check his blood again and again.
+He lives on water, tea, coffee, and vitamins.
 
-Month six. Two hundred pounds are gone.
+And the strangest part? He goes to the bathroom once every forty to fifty days.
 
-And here's the strangest part. Without food, his body almost stops going to the bathroom. Once every forty to fifty days.
+Day three hundred eighty-two. His first meal: a boiled egg and bread with butter.
 
-Day three hundred eighty-two. He finally eats. A boiled egg, and a slice of bread with butter.
+He lost two hundred seventy-six pounds. And kept it off.
 
-He said he'd forgotten what food tastes like.
-
-He lost two hundred seventy-six pounds. Five years later, he'd kept almost all of it off.
-
-Doctors say: never, ever try this without medical supervision.
+Never try this without doctors.
 
 Could you go one day?
 
@@ -70,30 +64,24 @@ In 1965, a 456-lb man asked doctors to let him stop eating. He didn't eat for 38
 
 Что будет, если не есть… триста восемьдесят два дня?
 
-В 1965 году двадцатисемилетний мужчина пришёл в больницу в Шотландии. Его звали Ангус Барбьери. Он весил 207 килограммов. И попросил врачей о безумном: «Дайте мне перестать есть».
-
-Они согласились на короткое голодание. Несколько дней. Может, неделю.
+В 1965 году мужчина весом 207 килограммов пришёл в больницу в Шотландии. Его звали Ангус Барбьери. Он попросил врачей: «Дайте мне перестать есть». Они согласились. На несколько дней.
 
 Он так и не остановился.
 
-День первый. Голод. Головная боль. Каждый запах — пытка.
+День первый. Голод. Головная боль.
 
-День третий. Голод уходит. В теле заканчивается сахар, и оно начинает сжигать собственный жир.
+День третий. Голод уходит. Тело начинает сжигать собственный жир.
 
-Вторая неделя. Он чувствует лёгкость. Ясность. Он возвращается на работу — в семейную закусочную с рыбой и картошкой фри. Жарит еду, которую не может есть.
+Вторая неделя. Он возвращается на работу в семейную закусочную с рыбой и картошкой фри. Жарит еду, которую не может есть.
 
-Он живёт на воде, чае, чёрном кофе и витаминах. Врачи снова и снова проверяют его кровь.
+Он живёт на воде, чае, кофе и витаминах.
 
-Шестой месяц. Минус девяносто килограммов.
+А самое странное? Он ходит в туалет раз в сорок–пятьдесят дней.
 
-А вот самое странное. Без еды его тело почти перестаёт ходить в туалет. Раз в сорок–пятьдесят дней.
+День триста восемьдесят второй. Первая еда: варёное яйцо и хлеб с маслом.
 
-День триста восемьдесят второй. Он наконец ест. Варёное яйцо и кусок хлеба с маслом.
+Он сбросил 125 килограммов. И не набрал их обратно.
 
-Он сказал, что забыл вкус еды.
-
-Он сбросил сто двадцать пять килограммов. А через пять лет почти весь вес так и не вернулся.
-
-Врачи говорят: никогда не пробуйте это без медицинского наблюдения.
+Никогда не пробуйте это без врачей.
 
 А вы смогли бы продержаться хотя бы день?
