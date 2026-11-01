@@ -19,7 +19,10 @@ from engine import (CREAM, CUR_T, MS, PALETTE, PF, PFI, RED, S, SHAKES, WH, WW, 
                     photo_post, photo_rev, place_photo, pose, post, radial, red_circle, rot_pts, shaded, silhouette,
                     skeleton, squash, to_img, walk, word_t)
 from lib1 import (LAMP_RIM, NIGHT_RIM, WHITE, _cap, caption, draw_quote, facade_bg, film_camera, flash, phone_feed,
-                  phone_ui, portrait, pov_hand, shadow_text, viewfinder, year_tag)
+                  phone_ui, portrait, shadow_text, viewfinder, year_tag)
+from hands import pov_hand
+
+lib1.pov_hand = pov_hand
 from props import bloom, hallway, night_street, rain, reflect, tree, volumetric
 from timeline import DURATION, FPS, H, SCENES, W, v
 
@@ -347,13 +350,14 @@ def passport(c, x, y, k):
     c.rect(x - 350, y - 240, x + 350, y + 240, (120, 30, 34), r=10)
     c.rect(x - 330, y - 220, x - 10, y + 220, (226, 220, 200))
     c.rect(x + 10, y - 220, x + 330, y + 220, (226, 220, 200))
-    c.rect(x - 300, y - 170, x - 150, y + 20, (150, 140, 120))
-    c.ell(x - 225, y - 100, 40, 48, (60, 56, 52))
-    c.poly([(x - 290, y + 20), (x - 280, y - 30), (x - 170, y - 30), (x - 160, y + 20)], (60, 56, 52))
-    c.text(x - 120, y - 150, "Фамилия", PFI(24, 500), (110, 100, 90), anchor="lm")
-    c.text(x - 120, y - 110, "ГРОМОВ", MS(34, 800), (30, 30, 60), anchor="lm")
-    c.text(x - 120, y - 50, "Имя", PFI(24, 500), (110, 100, 90), anchor="lm")
-    c.text(x - 120, y - 10, "ИВАН", MS(34, 800), (30, 30, 60), anchor="lm")
+    c.rect(x - 315, y - 190, x - 215, y - 60, (150, 140, 120))      # фото
+    c.ell(x - 265, y - 145, 26, 32, (60, 56, 52))
+    c.poly([(x - 308, y - 60), (x - 300, y - 92), (x - 230, y - 92), (x - 222, y - 60)], (60, 56, 52))
+    for i, (lab, val) in enumerate((("Фамилия", "ГРОМОВ"), ("Имя", "ИВАН"), ("Отчество", "СЕРГЕЕВИЧ"))):
+        yy = y - 20 + i * 70
+        c.text(x - 315, yy, lab, PFI(20, 500), (110, 100, 90), anchor="lm")
+        c.text(x - 315, yy + 30, val, MS(28, 800), (30, 30, 60), anchor="lm")
+        c.line([(x - 315, yy + 48), (x - 30, yy + 48)], (190, 180, 160), 2)
     c.text(x + 170, y - 120, "СССР", MS(40, 800), (150, 40, 40))
     for i in range(5):
         c.line([(x + 50, y - 40 + i * 40), (x + 290, y - 40 + i * 40)], (180, 170, 150), 4)
