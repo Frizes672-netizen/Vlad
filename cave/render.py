@@ -20,7 +20,8 @@ from engine import (CREAM, CUR_T, MS, PALETTE, PF, PFI, RED, S, SHAKES, WH, WW, 
 from hands import pov_hand
 from lib1 import WHITE, caption, draw_quote, shadow_text, year_tag
 from props import bloom, volumetric
-from timeline import DURATION, FPS, H, SCENES, W, v
+from timeline import DURATION, FPS, H, QUOTES, SCENES, W, v
+from subs import draw_subs
 
 lib1.pov_hand = pov_hand
 SKIN = (206, 168, 142)
@@ -570,6 +571,7 @@ def frame(i):
     if txt:
         txt(img)
     draw_quote(img, t)
+    draw_subs(img, t, hide=[(v(a) - 0.1, v(b)) for a, b, _, _ in QUOTES])
     return img.tobytes()
 
 
