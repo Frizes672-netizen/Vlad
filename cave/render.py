@@ -57,6 +57,10 @@ def ice_cave(seed=1, tint=ICE):
     ice = ice + spec[:, :, None] * np.array([150, 190, 220], np.float32)
     floor = np.clip((yy - WH * 0.78) / (WH * 0.22), 0, 1)
     ice = ice * (1 - floor[:, :, None]) + floor[:, :, None] * np.array([40, 48, 60], np.float32) * (0.6 + 0.6 * n[:, :, None])
+    snow = np.clip((fbm(WW, WH, [30, 90], seed + 3) - 0.55) * 4, 0, 1) * floor
+    ice = ice * (1 - snow[:, :, None]) + snow[:, :, None] * np.array([200, 214, 228], np.float32)
+    glint = (fbm(WW, WH, [200, 400], seed + 4) > 0.82) * floor * 0.8
+    ice = ice + glint[:, :, None] * np.array([120, 150, 170], np.float32)
     img = to_img(ice)
     c = C(img)
     r = np.random.default_rng(seed)
@@ -79,15 +83,32 @@ def headlamp_glow(img, x, y, ang, length=900, spread=0.32, col=(150, 130, 90), s
 def caver(img, x, feet, h, p, f=1, rim=LAMP, view="side", lamp=True, light=(1, -0.4)):
     """Спелеолог: силуэт, каска, налобный фонарь."""
     parts = person_parts(x, feet, h, p, f, "young", view)
-    silhouette(img, parts, base=(10, 12, 16), rim=rim, light=light, rim_w=4, fill_light=(6, 8, 12))
     if view == "side":
         J = skeleton(x, feet, h, p, f)
         hx, hy = J["head"]
+        sx, sy = J["sh"]
+        hipx, hipy = J["hip"]
+        cb = C(img)                                   # рюкзак за спиной
+        bx = sx - f * h * 0.1
+        cb.poly([(bx - f * h * 0.02, sy - h * 0.02), (bx - f * h * 0.11, sy + h * 0.01), (bx - f * h * 0.12, hipy - h * 0.02),
+                 (bx + f * h * 0.0, hipy + h * 0.02)], (40, 30, 24))
+        cb.poly([(bx - f * h * 0.05, sy - h * 0.06), (bx - f * h * 0.12, sy - h * 0.03), (bx - f * h * 0.11, sy + h * 0.02),
+                 (bx - f * h * 0.03, sy)], (60, 44, 30))   # скатка
     else:
         hx, hy = x, feet - h * 0.86
+        sx, sy = x, feet - h * (0.48 + 0.29)
+    silhouette(img, parts, base=(10, 12, 16), rim=rim, light=light, rim_w=4, fill_light=(6, 8, 12))
     c = C(img)
+    # светоотражающие полосы на куртке и брюках
+    for yy, ww in ((sy + h * 0.12, 0.09), (feet - h * 0.12, 0.05)):
+        c.rect(x - h * ww, yy, x + h * ww, yy + h * 0.012, (190, 200, 160, 150))
+    # моток верёвки через плечо
+    c.arc(sx, sy + h * 0.1, h * 0.09, h * 0.13, 200, 340, (170, 130, 70), max(2, h * 0.012))
+    c.arc(sx, sy + h * 0.1, h * 0.075, h * 0.115, 200, 340, (140, 104, 56), max(2, h * 0.01))
     c.ell(hx, hy - h * 0.03, h * 0.066, h * 0.055, (200, 160, 40))   # каска
+    c.ell(hx - h * 0.02, hy - h * 0.055, h * 0.025, h * 0.015, (250, 220, 120, 160))   # блик на каске
     c.rect(hx - h * 0.07, hy - h * 0.01, hx + h * 0.07, hy + h * 0.004, (150, 120, 30))
+    c.rect(hx - h * 0.066, hy - h * 0.042, hx + h * 0.066, hy - h * 0.03, (30, 30, 30))      # ремешок фонаря
     lx = hx + f * h * 0.05 if view == "side" else hx
     if lamp:
         c.ell(lx, hy - h * 0.035, h * 0.016, h * 0.016, (255, 250, 220))
@@ -110,6 +131,24 @@ def drips(c, t, n=10, seed=2, area=(0, 0, W, 1500)):
         ph = (t * r.uniform(0.6, 1.2) + r.uniform(0, 1)) % 1
         y = y0 + 120 + ph ** 2 * (y1 - y0)
         c.line([(x, y), (x, y + 16)], (200, 230, 250, 200), 3)
+
+
+def tent(c):
+    """Палатка: два ската со светотенью, швы, растяжки к ледобурам, снег на скатах, вход."""
+    c.ell(540, 1505, 300, 26, (0, 0, 0, 120))
+    c.poly([(300, 1500), (540, 1080), (560, 1500)], (160, 76, 42))
+    c.poly([(540, 1080), (780, 1500), (560, 1500)], (120, 54, 30))
+    for k in range(1, 4):
+        c.line([(540, 1080), (300 + k * 60, 1500)], (130, 60, 34), 2)
+        c.line([(540, 1080), (560 + k * 55, 1500)], (96, 42, 24), 2)
+    c.poly([(470, 1500), (540, 1300), (610, 1500)], (30, 16, 12))
+    c.line([(540, 1300), (540, 1500)], (80, 40, 24), 2)
+    c.poly([(505, 1150), (540, 1080), (575, 1150), (540, 1170)], (230, 240, 250))     # снег на коньке
+    c.poly([(330, 1460), (380, 1380), (420, 1420), (360, 1480)], (220, 232, 244, 200))
+    for x0, y0, x1 in ((540, 1085, 230), (540, 1085, 860)):                          # растяжки
+        c.line([(x0, y0), (x1, 1520)], (220, 220, 210, 180), 2)
+        c.rect(x1 - 4, 1510, x1 + 4, 1540, (160, 160, 170))
+    c.rect(250, 1500, 830, 1512, (60, 70, 90))                                        # коврик-подложка
 
 
 # ================================================================ 1. хук: часы трескаются, падение в темноту
@@ -289,9 +328,7 @@ def sc_descent(t, lt, dur):
         return frame, txt
     img = ice_cave(1).copy()                            # палатка, фонарь, 0°, темнота
     c = C(img)
-    c.poly([(300, 1500), (540, 1080), (780, 1500)], (150, 70, 40))
-    c.poly([(540, 1080), (780, 1500), (700, 1500)], (110, 50, 30))
-    c.poly([(470, 1500), (540, 1300), (610, 1500)], (40, 20, 14))
+    tent(c)
     c.rect(820, 1380, 860, 1470, (60, 60, 64))           # фонарь-лампа
     c.ell(840, 1370, 22, 22, LAMP)
     img = glow(img, lambda d, k: d.ellipse([600 * k, 1180 * k, 1080 * k, 1600 * k], fill=(150, 110, 60)), 70,
@@ -395,8 +432,7 @@ def sc_confusion(t, lt, dur):
     if t < t_month:                                     # спит → просыпается рывком, часы крутятся
         img = ice_cave(1).copy()
         c = C(img)
-        c.poly([(300, 1500), (540, 1080), (780, 1500)], (150, 70, 40))
-        c.poly([(470, 1500), (540, 1300), (610, 1500)], (40, 20, 14))
+        tent(c)
         lying = [(kind, geo, part) for kind, geo, part in person_parts(560, 1500, 520, pose(), 1, "young", "front")]
         from render_helpers import rot_parts
         sil = rot_parts(lying, 560, 1500, -90)
